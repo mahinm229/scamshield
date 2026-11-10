@@ -1,0 +1,32 @@
+# ScamShield CI — runs on every push and pull request.
+# Lives at .github/workflows/ci.yml so GitHub Actions actually runs it
+# (a ci.yml at the repo root is never picked up — audit fix, Nov 10 2026).
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run tests
+        run: npm test
+      - name: Browser bundles are in sync with the ES modules
+        run: |
+          npm run build:browser
+          git diff --exit-code -- detector.browser.js samples.browser.js
+      - name: Benchmark smoke check
+        run: npm run benchmark
+      - name: Server smoke check (npm start serves the app)
+        run: |
+          (npm start > /tmp/scamshield-server.log 2>&1 & echo $! > /tmp/scamshield-server.pid)
+          sleep 2
+          curl --fail --silent http://127.0.0.1:8000/ | grep -q "ScamShield"
+          curl --fail --silent http://127.0.0.1:8000/detector.browser.js | grep -q "analyzeMessage"
+          kill "$(cat /tmp/scamshield-server.pid)"
