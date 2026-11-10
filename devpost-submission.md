@@ -1,6 +1,6 @@
 # Devpost submission text — ScamShield (SafeSpace Hacks 2026)
 
-Fill in the two links after the repo is created. Everything else is ready to paste.
+Links verified live 2026-11-10 (repo public, demo loads and analyzes). Everything else is ready to paste.
 
 ## Project name
 
@@ -10,10 +10,10 @@ ScamShield
 
 Paste any message. Know if it is a scam — before you tap, pay, or share anything.
 
-## Links (FILL IN AFTER PUBLISHING)
+## Links (verified live 2026-11-10)
 
-- GitHub repo: https://github.com/mahinm229/scamshield (verify after creation)
-- Live demo: https://mahinm229.github.io/scamshield/ (verify after GitHub Pages is enabled)
+- GitHub repo: https://github.com/mahinm229/scamshield (verified — public, 25 files, CI green)
+- Live demo: https://mahinm229.github.io/scamshield/ (verified — loads and analyzes, lottery sample scores 100/100)
 - Demo video: [YouTube link — user uploads demo-video.mp4 as Public and pastes the link]
 
 ## Problem

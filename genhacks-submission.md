@@ -4,8 +4,8 @@ Track: **AI, Agentic Systems, Cybersecurity, and Dev Tools**
 ("Your project integrates AI, makes software more secure, or helps developers
 build" — ScamShield makes software more secure.)
 
-Fill in the links after the repo is created. The same repo, demo and video
-as the SafeSpace submission are reused.
+Links verified live 2026-11-10 (repo public, demo loads and analyzes).
+The same repo, demo and video as the SafeSpace submission are reused.
 
 ## Project name
 
@@ -15,10 +15,10 @@ ScamShield
 
 Paste any message. Know if it is a scam — before you tap, pay, or share anything.
 
-## Links (FILL IN AFTER PUBLISHING)
+## Links (verified live 2026-11-10)
 
-- GitHub repo: https://github.com/mahinm229/scamshield (verify after creation)
-- Live demo: https://mahinm229.github.io/scamshield/ (verify after GitHub Pages is enabled)
+- GitHub repo: https://github.com/mahinm229/scamshield (verified — public, 25 files, CI green)
+- Live demo: https://mahinm229.github.io/scamshield/ (verified — loads and analyzes, lottery sample scores 100/100)
 - Demo video: [YouTube link — upload demo-video.mp4 as Public, embedding ON, and paste the link]
 
 ## What it does
