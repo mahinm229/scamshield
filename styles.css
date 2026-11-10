@@ -1,0 +1,179 @@
+/* ScamShield — mobile-first, system fonts only, works offline. */
+* { box-sizing: border-box; }
+
+:root {
+  --ink: #1c2430;
+  --muted: #5b6675;
+  --line: #d9dee6;
+  --bg: #f4f6f8;
+  --card: #ffffff;
+  --safe: #1a7f37;
+  --safe-bg: #e6f4ea;
+  --caution: #9a6700;
+  --caution-bg: #fef3c7;
+  --scam: #b42318;
+  --scam-bg: #fdecea;
+  --accent: #1456c4;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans Bengali", sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.55;
+}
+
+.wrap { max-width: 720px; margin: 0 auto; padding: 0 16px 48px; }
+
+/* Sticky header (audit fix, Nov 10 2026): previously `position: static`,
+   so at scrollY = 850 the header had scrolled away (top: -850px).
+   It now stays pinned at top: 0 while the page scrolls beneath it. */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+}
+header .wrap { padding-top: 20px; padding-bottom: 16px; }
+h1 { margin: 0 0 4px; font-size: 1.7rem; line-height: 1.2; }
+.tagline { margin: 0 0 12px; color: var(--muted); font-size: 1rem; }
+
+.badge {
+  display: inline-block;
+  background: var(--safe-bg);
+  color: var(--safe);
+  border: 1px solid #b7dfc2;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+h2 { font-size: 1.15rem; margin: 28px 0 8px; }
+p { margin: 0 0 12px; }
+.muted { color: var(--muted); font-size: 0.92rem; }
+
+textarea {
+  width: 100%;
+  min-height: 140px;
+  padding: 12px;
+  font: inherit;
+  font-size: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  resize: vertical;
+}
+textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+button {
+  font: inherit;
+  font-weight: 600;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  padding: 10px 18px;
+  cursor: pointer;
+}
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button:hover { filter: brightness(0.96); }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.count { color: var(--muted); font-size: 0.85rem; margin: 6px 0 0; }
+
+/* Samples — flex instead of a floated tag, so a long label can never
+   push the tag outside the button or overlap it at 390px. */
+.samples { display: grid; gap: 8px; }
+.sample-btn { text-align: left; font-weight: 500; display: flex; justify-content: space-between; align-items: center; gap: 8px; min-width: 0; }
+.sample-btn > span:first-child { min-width: 0; }
+.sample-btn .tag {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+.samples-note { font-size: 0.85rem; color: var(--muted); }
+
+/* Result card */
+.result { margin-top: 24px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); padding: 18px; }
+.result[hidden] { display: none; }
+.verdict-line { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.verdict { font-size: 1.4rem; font-weight: 800; }
+.score { font-size: 1.1rem; font-weight: 700; color: var(--muted); }
+.result.safe { border-color: #b7dfc2; background: var(--safe-bg); }
+.result.safe .verdict { color: var(--safe); }
+.result.caution { border-color: #f2d38a; background: var(--caution-bg); }
+.result.caution .verdict { color: var(--caution); }
+.result.scam { border-color: #f5b8b1; background: var(--scam-bg); }
+.result.scam .verdict { color: var(--scam); }
+
+.bar { height: 12px; background: #e3e8ee; border-radius: 999px; overflow: hidden; margin: 12px 0 4px; }
+.bar > span { display: block; height: 100%; border-radius: 999px; background: var(--safe); }
+.result.caution .bar > span { background: #d9930d; }
+.result.scam .bar > span { background: var(--scam); }
+.bar-labels { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--muted); }
+
+.result h3 { margin: 18px 0 8px; font-size: 1rem; }
+.signal-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.signal-list li { background: rgba(255,255,255,0.75); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.signal-list .sig-head { display: flex; justify-content: space-between; gap: 10px; font-weight: 700; }
+.signal-list .points { white-space: nowrap; }
+.signal-list p { margin: 4px 0 0; color: var(--ink); font-size: 0.95rem; }
+.positive-list li { background: transparent; border-style: dashed; }
+
+/* Visible explanation for an invalid click (audit fix, Nov 10 2026). */
+.form-error {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border: 1px solid #f5b8b1;
+  border-radius: 8px;
+  background: var(--scam-bg);
+  color: var(--scam);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.form-error[hidden] { display: none; }
+
+.message-echo {
+  background: #eef1f4;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  white-space: pre-wrap;
+  /* Break a long token only when it would otherwise overflow the card
+     (overflow-wrap: break-word). Never break-all: ordinary words are
+     never split mid-token (audit fix, Nov 10 2026). */
+  overflow-wrap: break-word;
+  word-break: normal;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.next-steps { margin: 0; padding-left: 20px; }
+.next-steps li { margin-bottom: 6px; }
+.uncertainty {
+  margin-top: 16px;
+  border-top: 1px dashed var(--line);
+  padding-top: 12px;
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+details { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-top: 24px; }
+details summary { font-weight: 700; cursor: pointer; }
+details p, details ul { font-size: 0.95rem; }
+details ul { padding-left: 20px; }
+
+footer { margin-top: 32px; color: var(--muted); font-size: 0.85rem; }
+footer p { margin-bottom: 6px; }

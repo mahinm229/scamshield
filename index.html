@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScamShield — Is this message a scam?</title>
+<meta name="description" content="Paste any SMS, email or WhatsApp message and check whether it looks like a scam. 100% on-device — nothing is uploaded.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>🛡️ ScamShield</h1>
+    <p class="tagline">Paste a message. Find out if it looks like a scam — before you tap, pay, or share anything.</p>
+    <span class="badge">🔒 100% on-device — your message never leaves this device</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <h2>Check a message</h2>
+  <p class="muted">Paste any SMS, email or WhatsApp message — in Bangla or English. Nothing is sent anywhere; the check runs entirely in your browser.</p>
+
+  <label for="message" class="muted">Your message</label>
+  <textarea id="message" placeholder="Paste the message here…
+
+Example: Congratulations! You won a lottery. Send your OTP to claim it."></textarea>
+  <p class="count" id="count">0 characters</p>
+  <div class="row">
+    <button class="primary" id="analyze" type="button">Analyze message</button>
+    <button id="clear" type="button">Clear</button>
+  </div>
+  <p class="form-error" id="form-error" role="alert" hidden></p>
+
+  <section class="result" id="result" hidden aria-live="polite">
+    <div class="verdict-line">
+      <span class="verdict" id="verdict"></span>
+      <span class="score" id="score"></span>
+    </div>
+    <div class="bar" role="img" id="bar" aria-label="Risk score bar"><span id="bar-fill"></span></div>
+    <div class="bar-labels"><span>0 · Safe</span><span>30 · Caution</span><span>60 · Likely scam</span><span>100</span></div>
+
+    <h3>Your message</h3>
+    <p class="message-echo" id="echo"></p>
+
+    <h3>Why this score</h3>
+    <ul class="signal-list" id="signals"></ul>
+
+    <h3>What looks fine</h3>
+    <ul class="signal-list positive-list" id="positives"></ul>
+
+    <h3>What to do next</h3>
+    <ul class="next-steps" id="next-steps"></ul>
+
+    <p class="uncertainty"><strong>Please note:</strong> this is a guide, not proof. ScamShield reads the words of the message only — it cannot verify who really sent it. When unsure, don’t click, don’t pay, and don’t share codes.</p>
+  </section>
+
+  <h2>Try an example</h2>
+  <p class="samples-note">All examples below are invented for demonstration. They are not real messages from real people. Tap one to check it.</p>
+  <div class="samples" id="samples"></div>
+
+  <details>
+    <summary>How the score works</summary>
+    <p>Every message starts at 25 points. Signals that scammers use add points; reassuring facts take points away. The score is always between 0 and 100.</p>
+    <ul>
+      <li><strong>0–29 · Safe</strong> — nothing in the message looks like a known scam pattern.</li>
+      <li><strong>30–59 · Caution</strong> — something looks off. Verify through the official app or official phone number before acting.</li>
+      <li><strong>60–100 · Likely scam</strong> — several scam patterns at once. Do not click, pay, or share codes.</li>
+    </ul>
+    <p>Signals include shortened links, links to raw IP addresses, unsafe (http) links, links that pretend to be bKash / Nagad / Rocket, requests for money or OTPs, urgency, threats, lottery claims, job fees, and “parcel held” customs fees — in Bangla and English. The full list is in <code>detector.mjs</code>.</p>
+  </details>
+
+  <footer>
+    <p>ScamShield was built on Nov 10, 2026 for SafeSpace Hacks. No pre-existing code. No trackers, no cookies, no accounts, no uploads.</p>
+    <p>If you already sent money or shared an OTP, call your bank or bKash (16247) at once and change your passwords.</p>
+  </footer>
+</main>
+
+<script src="detector.browser.js"></script>
+<script src="samples.browser.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
