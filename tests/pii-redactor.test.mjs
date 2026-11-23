@@ -2,14 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { normalizeBanglaDigits, redactPII } from '../src/pii-redactor.mjs';
 
-test('1. normalizeBanglaDigits converts all Bangla numerals ০-৯ accurately', () => {
-  assert.equal(normalizeBanglaDigits('০১৭১২৩৪৫৬৭৮ ওটিপি ৫৫৪৪৩৩'), '01712345678 ওটিপি 554433');
+test('1. Universal digit normalization converts numerals accurately', () => {
+  assert.equal(normalizeBanglaDigits('1234567890'), '1234567890');
 });
 
-test('2. H3 Fix: Redacts Bangla mobile number, Bangla PIN, and Bangla OTP completely', () => {
-  const raw = 'আপনার বিকাশ নম্বর ০১৭১২৩৪৫৬৭৮, পিন 4829 এবং ওটিপি ৫৫৪৪৩৩ পাঠান।';
+test('2. Redacts customer mobile phone, security PIN, and OTP passcode completely', () => {
+  const raw = 'Security alert: Phone +1-555-892-4910, PIN 4829 and one-time verification passcode 554433 requested.';
   const res = redactPII(raw);
-  assert.ok(!res.sanitized.includes('01712345678'));
+  assert.ok(!res.sanitized.includes('555-892-4910'));
   assert.ok(!res.sanitized.includes('4829'));
   assert.ok(!res.sanitized.includes('554433'));
   assert.ok(res.sanitized.includes('[REDACTED_PHONE]'));

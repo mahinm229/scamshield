@@ -39,7 +39,7 @@ test('4. Incident Report generator defangs URLs and omits raw PII', async () => 
   const engine = createScamShieldHybridEngine();
   const res = await engine.analyze({ text: SAMPLES[0].text });
   const report = buildIncidentReportText(res);
-  assert.ok(report.includes('login[.]bkash-verify-bd[.]xyz'), 'URL must be defanged in report');
-  assert.ok(!report.includes('01712345678'), 'Raw phone must not appear in incident report');
-  assert.ok(!report.includes('4829'), 'Raw PIN must not appear in incident report');
+  assert.ok(report.includes('chase-security-fraud-alert[.]xyz'), 'URL must be defanged in report');
+  assert.ok(!report.includes('9876543210123'), 'Raw account must not appear in incident report');
+  assert.ok(!report.includes('555-0199'), 'Raw phone must not appear in incident report');
 });

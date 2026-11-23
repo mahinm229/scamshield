@@ -1,305 +1,375 @@
 /**
- * ScamShield v2.0 — Hardened Deterministic Bilingual Scam Signal Engine
+ * ScamShield AI — Global Threat Detection Engine
  *
- * Improvements over v1:
- *  - Fixes subdomain URL truncation bug (M5): captures full multi-label subdomains like login.bkash-fake.com
- *  - Fixes legitimate bank/bKash OTP false-positive regression (H2): explicitly recognizes
- *    both "do not share" and "never share" protective bank advisories
- *  - Normalizes Bangla digits (০-৯) so Bangla amount/OTP/phone patterns are reliably scored
- *  - Zero external dependencies, ~0.04 ms/scan on-device
+ * Enterprise Cyber Threat Intelligence Architecture:
+ *  - Covers premier global financial institutions (Chase, Bank of America, Wells Fargo, PayPal, Citi, Revolut)
+ *  - Covers global enterprise tech & logistics (Apple, Google, Microsoft, Amazon, USPS, FedEx, DHL)
+ *  - Zero-latency multi-label subdomain brand spoofing detection
+ *  - Verified false-positive guard for legitimate 2FA/OTP delivery notices
+ *  - Sub-0.05ms execution latency with zero external runtime dependencies
  */
-
-import { normalizeBanglaDigits } from './pii-redactor.mjs';
 
 const SHORTENERS = new Set([
   'bit.ly', 'tinyurl.com', 't.co', 'goo.gl', 'ow.ly', 'is.gd',
-  'buff.ly', 'rb.gy', 'cutt.ly', 'shorturl.at', 'rebrand.ly',
+  'buff.ly', 'rb.gy', 'cutt.ly', 'shorturl.at', 'rebrand.ly', 't.ly'
 ]);
 
 const SUSPICIOUS_TLDS = new Set([
   'xyz', 'top', 'click', 'link', 'tk', 'ml', 'ga', 'cf', 'gq',
-  'icu', 'buzz', 'work', 'support', 'info', 'online', 'site', 'live',
+  'icu', 'buzz', 'work', 'support', 'info', 'online', 'site', 'live', 'vip'
 ]);
 
-const BRAND_DOMAINS = {
-  bkash: ['bkash.com'],
-  nagad: ['nagad.com.bd'],
-  rocket: ['dutchbanglabank.com'],
+export const BRAND_DOMAINS = {
+  chase: ['chase.com'],
+  bankofamerica: ['bankofamerica.com', 'bofa.com'],
+  wellsfargo: ['wellsfargo.com'],
+  citi: ['citi.com', 'citigroup.com'],
   paypal: ['paypal.com'],
+  apple: ['apple.com', 'icloud.com'],
   google: ['google.com', 'accounts.google.com'],
   amazon: ['amazon.com'],
+  microsoft: ['microsoft.com', 'live.com', 'office.com'],
+  netflix: ['netflix.com'],
   usps: ['usps.com'],
   fedex: ['fedex.com'],
   dhl: ['dhl.com'],
-  apple: ['apple.com', 'icloud.com'],
-  microsoft: ['microsoft.com', 'live.com'],
-  whatsapp: ['whatsapp.com'],
-  meta: ['facebook.com', 'meta.com'],
+  ups: ['ups.com'],
+  coinbase: ['coinbase.com'],
+  binance: ['binance.com'],
+  revolut: ['revolut.com'],
+  irs: ['irs.gov'],
+  meta: ['facebook.com', 'meta.com', 'instagram.com', 'whatsapp.com']
 };
 
-const SIGNAL_RULES = [
+export const SIGNAL_RULES = [
   {
     id: 'otp_pin_harvest',
-    label: 'OTP / PIN Harvesting',
-    weight: 34,
+    label: 'Credential & 2FA Harvesting',
+    weight: 35,
     severity: 'critical',
-    regex: /\b(send|share|reply|tell|give|confirm|verify|enter|provide)\b[^.!?\n]{0,45}\b(otp|pin|passcode|verification\s+code|security\s+code|6[- ]digit|4[- ]digit)\b|(পিন|ওটিপি|কোড)[^.!?।\n]{0,30}(দিন|পাঠান|বলুন|শেয়ার(?!\s*করবেন\s*না)|ভেরিফাই)/i,
-    reason: 'Requests a one-time password (OTP) or PIN — legitimate banks and MFS providers never ask you to share these.',
+    regex: /\b(send|share|reply|tell|give|confirm|verify|enter|provide)\b[^.!?\n]{0,45}\b(otp|pin|passcode|verification\s+code|security\s+code|2fa|6[- ]digit|4[- ]digit)\b/i,
+    reason: 'Solicits a one-time passcode (OTP/2FA) — legitimate financial institutions and tech services never ask customers to share verification codes.',
   },
   {
     id: 'account_suspension_threat',
-    label: 'Account Freeze / Suspension Threat',
+    label: 'Account Suspension & Lockout Threat',
+    weight: 24,
+    severity: 'high',
+    regex: /\b(account|card|profile|wallet|access|service|membership)\b[^.!?\n]{0,40}\b(suspended|blocked|locked|frozen|deactivated|terminated|restricted|closed|disabled)\b|\b(suspended|blocked|locked|frozen|deactivated)\s+(bank\s+)?(account|wallet|card)\b/i,
+    reason: 'Weaponizes fear of immediate account deactivation or financial loss to bypass critical verification.',
+  },
+  {
+    id: 'unauthorized_transaction_lure',
+    label: 'Unauthorized Charge & Wire Fraud Lure',
     weight: 22,
     severity: 'high',
-    regex: /\b(account|wallet|card|bkash|nagad|paypal)\b[^.!?\n]{0,40}\b(suspended|blocked|locked|frozen|deactivated|terminated|restricted|closed)\b|\b(suspended|blocked|locked|frozen|deactivated)\s+(bank\s+)?(account|wallet|card)\b|(একাউন্ট|অ্যাকাউন্ট|বিকাশ|নগদ)[^.!?\n]{0,35}(বন্ধ|ব্লক|স্থগিত|সাসপেন্ড)/i,
-    reason: 'Uses fear of imminent account lock or suspension to force a rushed click or reply.',
+    regex: /\b(unauthorized|fraudulent|suspicious|pending)\b[^.!?\n]{0,35}\b(transaction|charge|purchase|wire|transfer|payment|debit|withdrawal|invoice)\b|\b(charged|debited|sent)\b[^.!?\n]{0,25}\$\d+/i,
+    reason: 'Alleges an unauthorized high-value debit to induce panic and force an immediate fraudulent confirmation.',
   },
   {
     id: 'urgency_deadline',
-    label: 'Artificial Urgency / Countdown',
+    label: 'Artificial Urgency & Coercive Deadline',
     weight: 16,
     severity: 'medium',
-    regex: /\b(urgent|immediately|within\s+\d+\s*(min|minute|hour|hr)|act\s+now|final\s+notice|last\s+warning|expires?\s+today|right\s+now)\b|(জরুরি|এখনই|দ্রুত|আগামী\s+\d+\s*(মিনিট|ঘণ্টা)|শেষ\s+সতর্কতা)/i,
-    reason: 'Creates artificial time pressure so the victim acts without verifying independently.',
+    regex: /\b(within\s+\d+\s*(hours?|hrs?|minutes?|mins?)|immediately|urgent|act\s+now|action\s+required|expires?\s+today|final\s+notice|time\s+sensitive)\b/i,
+    reason: 'Forces high-pressure psychological urgency to prompt an impulse reaction before the recipient can inspect headers.',
   },
   {
-    id: 'kyc_verify_lure',
-    label: 'Fake KYC / Re-Verification Lure',
-    weight: 18,
+    id: 'parcel_customs_phish',
+    label: 'Postal & Package Delivery Phishing',
+    weight: 22,
     severity: 'high',
-    regex: /\b(kyc|re-?verify|update\s+your\s+(info|details|account|billing)|confirm\s+identity|verify\s+now)\b|(কেওয়াইসি|তথ্য\s+আপডেট|ভেরিফাই\s+করুন)/i,
-    reason: 'Prompts urgent KYC or billing re-verification, a classic credential-phishing pretext.',
+    regex: /\b(package|parcel|shipment|delivery|customs)\b[^.!?\n]{0,45}\b(held|delayed|pending|suspended|exception|unpaid|fee|address\s+update|redelivery)\b/i,
+    reason: 'Impersonates logistics couriers (USPS, FedEx, DHL, UPS) claiming an unpaid customs clearance or address update fee.',
   },
   {
-    id: 'prize_lottery_bait',
-    label: 'Lottery / Cashback / Prize Bait',
-    weight: 26,
+    id: 'legal_regulatory_intimidation',
+    label: 'Regulatory & Legal Coercion',
+    weight: 25,
     severity: 'high',
-    regex: /\b(congratulations|you\s+won|winner|lottery|jackpot|claim\s+your\s+(prize|reward|bonus|cashback)|free\s+gift)\b|(অভিনন্দন|জিতেছেন|লটারি|পুরস্কার|ক্যাশব্যাক\s+জিতে)/i,
-    reason: 'Promises an unexpected prize, lottery win, or cashback reward to lure clicks or fee payments.',
+    regex: /\b(irs|fbi|law\s+enforcement|subpoena|arrest\s+warrant|legal\s+action|court\s+notice|tax\s+penalty|digital\s+arrest)\b/i,
+    reason: 'Threatens criminal prosecution, government audits, or law enforcement action to coerce compliance.',
   },
   {
-    id: 'advance_fee_or_giftcard',
-    label: 'Upfront Fee / Gift Card / Crypto Demand',
-    weight: 28,
-    severity: 'critical',
-    regex: /\b(processing\s+fee|registration\s+fee|customs\s+fee|gift\s+card|itunes\s+card|usdt|bitcoin|crypto\s+wallet|send\s+money\s+first|pay\s+to\s+claim)\b|(প্রসেসিং\s+ফি|রেজিস্ট্রেশন\s+ফি|টাকা\s+পাঠান|অগ্রিম\s+ফি)/i,
-    reason: 'Demands an upfront fee, gift card, or irreversible crypto transfer.',
-  },
-  {
-    id: 'remote_access_trojan',
-    label: 'Remote Screen-Share Tool Request',
-    weight: 30,
-    severity: 'critical',
-    regex: /\b(anydesk|teamviewer|quick\s*support|rustdesk|screen\s+share|install\s+this\s+apk|download\s+apk)\b/i,
-    reason: 'Asks the victim to install remote-access software or an unknown APK, granting full device takeover.',
+    id: 'crypto_investment_solicitation',
+    label: 'Crypto Arbitrage & Ponzi Task Lure',
+    weight: 22,
+    severity: 'high',
+    regex: /\b(crypto|bitcoin|usdt|guaranteed\s+return|daily\s+profit|passive\s+income|arbitrage|task\s+commission|review\s+tasks?|earn\s+\$\d+)\b/i,
+    reason: 'Promises guaranteed financial returns or daily micro-task payouts, typical of pig butchering and Ponzi operations.',
   },
   {
     id: 'job_task_scam',
-    label: 'Unrealistic Part-Time / Task Income Scam',
-    weight: 22,
+    label: 'Job & Social Task Solicitation',
+    weight: 26,
     severity: 'high',
-    regex: /\b(earn\s+\$?\d{2,5}\s*(daily|per\s+day|a\s+day)|part[- ]?time\s+job|like\s+youtube\s+videos|telegram\s+task|daily\s+salary|work\s+from\s+home\s+\d+)\b|(দৈনিক\s+\d+\s*টাকা|পার্ট\s*টাইম\s+জব|টেলিগ্রাম)/i,
-    reason: 'Matches high-pay, zero-skill task/Telegram job scams that escalate into prepaid deposit traps.',
+    regex: /\b(earn\s+\$\d+|daily\s+(salary|income|pay|payout)|liking\s+(youtube\s+)?videos?|contact\s+t\.me\/|telegram\s+task)\b/i,
+    reason: 'Solicits bogus work-from-home social media tasks typical of task scam operations.',
   },
   {
-    id: 'delivery_customs_smishing',
-    label: 'Fake Parcel / Customs Delivery Smishing',
+    id: 'advance_fee_or_giftcard',
+    label: 'Advance Fee & Crypto/Card Extortion',
+    weight: 28,
+    severity: 'high',
+    regex: /\b(registration\s+fee|processing\s+fee|advance\s+fee|fee\s+via\s+usdt|itunes\s+card|gift\s+card|apple\s+gift\s+card)\b/i,
+    reason: 'Demands upfront payment via cryptocurrency or gift cards, a universal indicator of fraud.',
+  },
+  {
+    id: 'whatsapp_redirect',
+    label: 'Off-Platform Messaging Redirect',
     weight: 18,
     severity: 'medium',
-    regex: /\b(parcel|package|shipment|courier)\b[^.!?\n]{0,45}\b(held|customs|incomplete\s+address|redelivery|failed\s+delivery|unpaid\s+fee)\b/i,
-    reason: 'Impersonates a postal or courier alert to harvest card details via a fake redelivery link.',
+    regex: /\b(wa\.me\/|whatsapp|telegram|contact\s+me\s+on\s+whatsapp)\b/i,
+    reason: 'Diverts communication to private unmonitored encrypted messaging channels.',
   },
   {
-    id: 'off_platform_redirect',
-    label: 'Off-Platform WhatsApp / Telegram Redirect',
+    id: 'remote_access_trojan',
+    label: 'Remote Access Tool Coercion',
+    weight: 30,
+    severity: 'critical',
+    regex: /\b(anydesk|teamviewer|ultraviewer|quicksupport|screen\s*share|remote\s+desktop|install\s+support\s+app)\b/i,
+    reason: 'Commands the user to install a remote desktop access utility to hijack the device.',
+  },
+  {
+    id: 'unsolicited_lottery_prize',
+    label: 'Unsolicited Sweepstakes & Windfall Lure',
+    weight: 20,
+    severity: 'medium',
+    regex: /\b(lottery|won|winner|sweepstakes|jackpot|unclaimed\s+prize|selected\s+for\s+\$\d+)\b/i,
+    reason: 'Claims an unearned monetary prize or lottery windfall to coax the user into paying an advance fee.',
+  },
+  {
+    id: 'credential_reset_phish',
+    label: 'Credential Verification Bait',
     weight: 14,
     severity: 'medium',
-    regex: /\b(contact\s+me\s+on\s+(whatsapp|telegram)|wa\.me\/|t\.me\/|message\s+on\s+telegram)\b/i,
-    reason: 'Pushes the conversation to encrypted messaging apps to evade carrier or marketplace protections.',
+    regex: /\b(verify|confirm|validate|update|reset)\s+(your\s+)?(identity|profile|credentials?|login|password|details|billing|card)\b/i,
+    reason: 'Prompts users to click an external link to re-enter sensitive login or billing credentials.',
   },
 ];
 
-// Protective legitimate advisory pattern (Fixes H2 false positive on legitimate bank/bKash OTP SMS)
-const LEGITIMATE_OTP_ADVISORY_REGEX =
-  /\b(do\s+not\s+share|never\s+share|don'?t\s+share|never\s+asks?\s+for\s+your\s+(otp|pin)|keep\s+it\s+confidential)\b|(কারো\s+সাথে\s+শেয়ার\s+করবেন\s+না|কখনো\s+(পিন|ওটিপি)\s+চায়\s+না)/i;
-
-/**
- * Extracts full URLs and bare multi-label domains (fixing M5 subdomain truncation bug).
- */
 export function extractUrls(text) {
-  const normalized = normalizeBanglaDigits(String(text ?? ''));
-  const found = new Set();
-
-  // Full http(s) URLs
-  const httpMatches = normalized.match(/https?:\/\/[^\s<>"')]+/gi) || [];
-  for (const m of httpMatches) {
-    found.add(m.replace(/[.,;:!?]+$/, ''));
-  }
-
-  // Bare multi-label domains (e.g., login.bkash-fake.com/verify, bit.ly/abc123)
-  const bareMatches =
-    normalized.match(
-      /(?<![@\w/])(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+(?:com|net|org|io|co|bd|xyz|top|click|link|tk|ml|ga|cf|gq|icu|buzz|work|support|info|online|site|live|ly|me)(?:\/[^\s<>"')]*)?/gi
-    ) || [];
-  for (const m of bareMatches) {
-    const cleaned = m.replace(/[.,;:!?]+$/, '');
-    const alreadyCovered = [...found].some((u) => u.toLowerCase().includes(cleaned.toLowerCase()));
-    if (!alreadyCovered) found.add(cleaned);
-  }
-
-  return [...found];
+  if (!text || typeof text !== 'string') return [];
+  const withScheme = text.match(/https?:\/\/[^\s"'<>\])]+/gi) || [];
+  const bareTlds = 'com|net|org|io|xyz|top|app|dev|co|us|uk|info|biz|online|site|live|vip';
+  const bareRegex = new RegExp(
+    `\\b(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+(?:${bareTlds})(?:\\/[^\\s"'<>\\])]*)?`,
+    'gi'
+  );
+  const bare = text.match(bareRegex) || [];
+  const combined = [...withScheme, ...bare];
+  const cleaned = combined.map((u) => u.replace(/[.,;:!?]+$/, ''));
+  return Array.from(new Set(cleaned));
 }
 
-function getHostname(urlStr) {
-  try {
-    const withProto = /^https?:\/\//i.test(urlStr) ? urlStr : `https://${urlStr}`;
-    return new URL(withProto).hostname.toLowerCase();
-  } catch {
-    return urlStr.split('/')[0].toLowerCase();
-  }
+export function parseHostname(url) {
+  const withoutScheme = url.replace(/^[a-z][a-z0-9+.-]*:\/\//i, '');
+  const hostWithPort = withoutScheme.split(/[/:?#]/)[0];
+  return hostWithPort.split(':')[0].toLowerCase();
 }
 
-export function analyzeDeterministic(rawText) {
-  const original = String(rawText ?? '').trim();
-  const normalized = normalizeBanglaDigits(original);
-
-  if (!original) {
-    return {
-      score: 0,
-      verdict: 'SAFE',
-      label: 'Empty Input',
-      signals: [],
-      urls: [],
-      spoofedBrands: [],
-      isLegitimateOtpAdvisory: false,
-      recommendedAction: 'Paste a suspicious SMS, email, or upload a payment screenshot to analyze.',
-    };
-  }
-
+export function detectBrandSpoofing(urls, text) {
   const signals = [];
-  let score = 0;
-
-  for (const rule of SIGNAL_RULES) {
-    if (rule.regex.test(normalized)) {
-      signals.push({
-        id: rule.id,
-        label: rule.label,
-        severity: rule.severity,
-        weight: rule.weight,
-        reason: rule.reason,
-      });
-      score += rule.weight;
-    }
-  }
-
-  const urls = extractUrls(normalized);
   const spoofedBrands = [];
+  const lowerText = text.toLowerCase();
 
   for (const url of urls) {
-    const host = getHostname(url);
-    const tld = host.split('.').pop();
-
-    if (SHORTENERS.has(host)) {
-      signals.push({
-        id: 'url_shortener',
-        label: `Shortened Link (${host})`,
-        severity: 'medium',
-        weight: 14,
-        reason: `Uses link shortener "${host}" to conceal the true destination domain.`,
-      });
-      score += 14;
-    }
-
-    if (SUSPICIOUS_TLDS.has(tld)) {
-      signals.push({
-        id: 'suspicious_tld',
-        label: `High-Risk TLD (.${tld})`,
-        severity: 'high',
-        weight: 18,
-        reason: `Domain "${host}" uses high-abuse TLD ".${tld}".`,
-      });
-      score += 18;
-    }
-
-    if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(host)) {
-      signals.push({
-        id: 'raw_ip_url',
-        label: `Raw IP URL (${host})`,
-        severity: 'critical',
-        weight: 28,
-        reason: 'Points directly to a raw IP address instead of a verified organization domain.',
-      });
-      score += 28;
-    }
-
-    // Brand impersonation check (e.g., login.bkash-verify.xyz vs official bkash.com)
+    const host = parseHostname(url);
     for (const [brand, officialDomains] of Object.entries(BRAND_DOMAINS)) {
-      if (host.includes(brand)) {
-        const isOfficial = officialDomains.some(
-          (od) => host === od || host.endsWith(`.${od}`)
-        );
-        if (!isOfficial) {
-          spoofedBrands.push({ brand, host, officialDomains });
-          signals.push({
-            id: `brand_spoof_${brand}`,
-            label: `Brand Spoofing (${brand} on ${host})`,
-            severity: 'critical',
-            weight: 35,
-            reason: `Domain "${host}" impersonates "${brand}" (official: ${officialDomains.join(', ')}).`,
-          });
-          score += 35;
-        }
+      const brandMentioned = lowerText.includes(brand) || host.includes(brand);
+      if (!brandMentioned) continue;
+
+      const isOfficial = officialDomains.some(
+        (domain) => host === domain || host.endsWith(`.${domain}`)
+      );
+
+      if (!isOfficial) {
+        spoofedBrands.push({ brand, host, officialDomains });
+        signals.push({
+          id: 'brand_spoofing',
+          label: `Brand Impersonation (${brand.toUpperCase()})`,
+          weight: 28,
+          severity: 'critical',
+          brand,
+          host,
+          reason: `Message references ${brand.toUpperCase()} but links to "${host}", which is NOT an official domain (${officialDomains.join(', ')}).`,
+        });
+        break;
       }
     }
   }
 
-  // Legitimate Bank / MFS OTP Protection (Fixes H2 regression)
-  const hasOtpMention = /\b(otp|verification\s+code|one[- ]time)\b|ওটিপি/i.test(normalized);
-  const hasProtectiveAdvisory = LEGITIMATE_OTP_ADVISORY_REGEX.test(normalized);
-  const hasHarvestDemand = signals.some((s) => s.id === 'otp_pin_harvest');
-  const isLegitimateOtpAdvisory =
-    hasOtpMention && hasProtectiveAdvisory && !hasHarvestDemand && urls.length === 0;
+  return { signals, spoofedBrands };
+}
 
-  if (isLegitimateOtpAdvisory) {
-    score = Math.min(score, 8);
-    signals.push({
-      id: 'legitimate_otp_advisory',
-      label: 'Standard Bank/MFS Security Advisory Detected',
-      severity: 'safe',
-      weight: 0,
-      reason:
-        'Contains a standard "do not share / never asks for OTP" security notice with no clickable link or request to reply.',
+export function isLegitimateSecurityAdvisory(text) {
+  const lower = text.toLowerCase();
+  const hasProtectiveWarning =
+    lower.includes('do not share') ||
+    lower.includes('never share') ||
+    lower.includes("don't share") ||
+    lower.includes('never tell anyone') ||
+    lower.includes('do not give this') ||
+    lower.includes('will never ask');
+
+  const hasDeliveryPattern =
+    (lower.includes('otp is') ||
+     lower.includes('passcode is') ||
+     lower.includes('verification code is') ||
+     lower.includes('security code is') ||
+     lower.includes('code:') ||
+     lower.includes('code is')) &&
+    !lower.includes('reply with') &&
+    !lower.includes('click here to') &&
+    !lower.includes('enter code at');
+
+  return hasProtectiveWarning && hasDeliveryPattern;
+}
+
+export function analyzeDeterministic(rawText) {
+  if (!rawText || !rawText.trim()) {
+    return {
+      score: 0,
+      verdict: 'SAFE',
+      riskLevel: 'SAFE',
+      confidenceScore: 0,
+      signals: [],
+      positives: [{ label: 'Empty Content', reason: 'No message content provided.' }],
+      urls: [],
+      rawText: '',
+      isLegitimateOtpAdvisory: false,
+      isAdvisorySafe: false,
+      spoofedBrands: [],
+    };
+  }
+
+  const text = rawText.trim();
+  const signals = [];
+  const positives = [];
+  const urls = extractUrls(text);
+
+  // Check Legitimate 2FA Advisory
+  if (isLegitimateSecurityAdvisory(text)) {
+    return {
+      score: 5,
+      verdict: 'SAFE',
+      riskLevel: 'SAFE',
+      confidenceScore: 5,
+      signals: [],
+      positives: [
+        {
+          label: 'Official 2FA Protective Advisory',
+          reason: 'Message contains protective advice ("Do not share... will never ask") typical of genuine bank & cloud 2FA deliveries.',
+        },
+      ],
+      urls,
+      rawText: text,
+      isLegitimateOtpAdvisory: true,
+      isAdvisorySafe: true,
+      spoofedBrands: [],
+    };
+  }
+
+  // URL checks
+  for (const url of urls) {
+    const host = parseHostname(url);
+
+    if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host)) {
+      signals.push({
+        id: 'raw_ip_url',
+        label: 'Direct IP Destination Link',
+        weight: 32,
+        severity: 'critical',
+        reason: `Links to a raw IP address (${host}) instead of an authenticated domain name.`,
+      });
+    }
+
+    if (SHORTENERS.has(host)) {
+      signals.push({
+        id: 'shortened_url',
+        label: 'Obfuscated Shortened Link',
+        weight: 18,
+        severity: 'medium',
+        reason: `Uses link-shortening service (${host}) to conceal the destination server.`,
+      });
+    }
+
+    const parts = host.split('.');
+    const tld = parts[parts.length - 1];
+    if (SUSPICIOUS_TLDS.has(tld)) {
+      signals.push({
+        id: 'suspicious_tld',
+        label: `High-Risk Top-Level Domain (.${tld})`,
+        weight: 16,
+        severity: 'medium',
+        reason: `Target domain uses .${tld}, a top-level domain frequently associated with low-reputation disposable phishing infrastructure.`,
+      });
+    }
+
+    if (url.startsWith('http://')) {
+      signals.push({
+        id: 'insecure_http',
+        label: 'Unencrypted (HTTP) Protocol',
+        weight: 8,
+        severity: 'low',
+        reason: 'Uses unencrypted HTTP protocol; legitimate banking institutions mandate TLS/HTTPS.',
+      });
+    }
+  }
+
+  // Brand spoofing
+  const { signals: brandSignals, spoofedBrands } = detectBrandSpoofing(urls, text);
+  signals.push(...brandSignals);
+
+  // Behavioral rules
+  for (const rule of SIGNAL_RULES) {
+    if (rule.regex.test(text)) {
+      signals.push({
+        id: rule.id,
+        label: rule.label,
+        weight: rule.weight,
+        severity: rule.severity,
+        reason: rule.reason,
+      });
+    }
+  }
+
+  const seenIds = new Set();
+  const dedupedSignals = signals.filter((s) => {
+    if (seenIds.has(s.id)) return false;
+    seenIds.add(s.id);
+    return true;
+  });
+
+  let score = 0;
+  for (const s of dedupedSignals) {
+    score += s.weight;
+  }
+
+  if (urls.length === 0) {
+    positives.push({
+      label: 'Zero External Links',
+      reason: 'No clickable hyperlinks present, eliminating direct phishing landing page threat.',
     });
   }
 
-  score = Math.max(0, Math.min(100, Math.round(score)));
+  score = Math.min(100, Math.max(0, Math.round(score)));
 
-  let verdict = 'SAFE';
-  let label = 'Low Risk / Likely Safe';
-  let recommendedAction =
-    'No scam indicators detected. Still verify unexpected financial requests directly in your official app.';
-
-  if (score >= 65) {
-    verdict = 'HIGH_RISK_SCAM';
-    label = 'High-Risk Scam Detected';
-    recommendedAction =
-      'Do NOT click any links, reply, or share OTP/PIN codes. Block the sender and report via your official provider app.';
-  } else if (score >= 30) {
-    verdict = 'SUSPICIOUS';
-    label = 'Suspicious — Needs Verification';
-    recommendedAction =
-      'Treat with caution. Independently verify through the official app or helpline before taking any action.';
-  }
+  let riskLevel = 'SAFE';
+  if (score >= 50) riskLevel = 'HIGH_RISK_SCAM';
+  else if (score >= 20) riskLevel = 'SUSPICIOUS';
 
   return {
     score,
-    verdict,
-    label,
-    signals,
+    verdict: riskLevel,
+    riskLevel,
+    confidenceScore: score,
+    signals: dedupedSignals,
+    positives,
     urls,
+    rawText: text,
+    isLegitimateOtpAdvisory: false,
+    isAdvisorySafe: false,
     spoofedBrands,
-    isLegitimateOtpAdvisory,
-    recommendedAction,
   };
 }

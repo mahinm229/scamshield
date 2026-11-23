@@ -3,7 +3,7 @@
  *
  * Adds v3.0 Masterpiece features:
  *  - OS-aware Light/Dark Theme toggle
- *  - 1-Click Official Complaint Templates (BTRC 1212 Bangladesh, BD Police Cyber Support, US FTC/IC3)
+ *  - 1-Click Official Complaint Templates (US FTC/IC3, CISA/APWG, US SEC/FINRA)
  *  - Cryptographic SHA-256 Evidence Fingerprint (Web Crypto API) + .txt Evidence Download
  *  - Live-Executable 20-Case Security & False-Positive Benchmark Table in UI
  *  - DevTools Styled Hybrid Lifecycle Console Logger (`[ScamShield Hybrid]`)
@@ -21,13 +21,22 @@ import { JUDGE_TOURS, SAMPLES } from './samples.mjs';
 const SESSION_CONFIG_KEY = 'scamshield_firebase_runtime_cfg_v3';
 
 export const AGENCY_HEADERS = {
-  btrc_1212: 'TO: BTRC Shortcode 1212 / bKash & Nagad Fraud Response Desk (Bangladesh)',
-  bd_cyber: 'TO: Bangladesh Police Cyber Support for Women / CTTC Cyber Crime Unit',
-  ftc_ic3: 'TO: US Federal Trade Commission (ReportFraud.ftc.gov) / FBI IC3',
+  ftc_ic3: 'TO: US Federal Trade Commission (ReportFraud.ftc.gov) / FBI IC3 (ic3.gov)',
+  cisa_apwg: 'TO: CISA & Anti-Phishing Working Group (APWG Report: reportphishing@apwg.org)',
+  sec_finra: 'TO: US SEC & FINRA Cyber Fraud Response Unit (sec.gov/tcr)',
 };
 
-export function buildIncidentReportText(result, agencyKey = 'btrc_1212') {
-  const agencyHeader = AGENCY_HEADERS[agencyKey] || AGENCY_HEADERS.btrc_1212;
+export function buildIncidentReportText(result, agencyKey = 'ftc_ic3') {
+  const agencyHeader = AGENCY_HEADERS[agencyKey] || AGENCY_HEADERS.ftc_ic3;
+  const privacySanitized =
+    result.privacyDiff?.sanitized ||
+    result.privacyDiff?.sanitizedText ||
+    '[No text provided]';
+  const scrubbedCount =
+    result.privacyDiff?.redactionCount ??
+    result.privacyDiff?.totalRedacted ??
+    0;
+
   const lines = [
     '=== SCAMSHIELD v3.0 — PII-SAFE OFFICIAL INCIDENT COMPLAINT ===',
     agencyHeader,
@@ -35,18 +44,18 @@ export function buildIncidentReportText(result, agencyKey = 'btrc_1212') {
     `Execution Mode: ${result.executionMode}`,
     `Verified SDK Inference Source: ${result.inferenceSource}`,
     `Cloud Bytes Transmitted: ${result.cloudBytesTransmitted} bytes`,
-    `Local PII Scrubbed: ${result.privacyDiff.redactionCount} sensitive items removed`,
+    `Local PII Scrubbed: ${scrubbedCount} sensitive items removed`,
     '',
     '--- Sanitized Evidence Message (Zero Raw Victim PII) ---',
-    result.privacyDiff.sanitized || '[No text provided]',
+    privacySanitized,
     '',
     '--- Detected Deterministic Signals ---',
-    ...(result.deterministic.signals.length > 0
+    ...(result.deterministic?.signals?.length > 0
       ? result.deterministic.signals.map((s) => `- [${s.severity.toUpperCase()}] ${s.label}: ${s.reason}`)
       : ['- None detected']),
   ];
 
-  if (result.deterministic.urls.length > 0) {
+  if (result.deterministic?.urls?.length > 0) {
     lines.push('', '--- Extracted Malicious URLs (Defanged) ---');
     for (const u of result.deterministic.urls) {
       lines.push(`- ${u.replace(/\./g, '[.]')}`);
@@ -59,10 +68,10 @@ export function buildIncidentReportText(result, agencyKey = 'btrc_1212') {
       '--- Firebase AI Logic Forensics ---',
       `Category: ${result.aiForensics.scamCategory || 'N/A'}`,
       `Summary: ${result.aiForensics.plainLanguageSummary || 'N/A'}`,
-      `Recommended Action: ${result.aiForensics.recommendedAction || result.deterministic.recommendedAction}`
+      `Recommended Action: ${result.aiForensics.recommendedAction || result.deterministic?.recommendedAction || 'N/A'}`
     );
   } else {
-    lines.push('', `Recommended Action: ${result.deterministic.recommendedAction}`);
+    lines.push('', `Recommended Action: ${result.deterministic?.recommendedAction || 'Block sender and discard message.'}`);
   }
 
   return lines.join('\n');
@@ -282,7 +291,7 @@ export function initScamShieldApp(doc = document, win = window, engineOverride =
 
   async function refreshComplaintDraft() {
     if (!lastResult) return;
-    const agencyKey = els.complaintAgencySelect ? els.complaintAgencySelect.value : 'btrc_1212';
+    const agencyKey = els.complaintAgencySelect ? els.complaintAgencySelect.value : 'ftc_ic3';
     lastReportText = buildIncidentReportText(lastResult, agencyKey);
     if (els.incidentReportPre) els.incidentReportPre.textContent = lastReportText;
     const sha = await computeEvidenceSha256(lastReportText);

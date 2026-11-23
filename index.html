@@ -3,25 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0B1120" />
-  <meta name="description" content="ScamShield v3.0 — Privacy-First Hybrid AI Financial Smishing & Fake-Receipt Defense powered by Firebase AI Logic (Gemini Nano + Gemini Cloud Fallback) and App Check." />
+  <meta name="theme-color" content="#070B14" />
+  <meta name="description" content="ScamShield AI — Privacy-First Hybrid AI Financial Smishing & Fraud Defense powered by Firebase AI Logic (firebase/ai v13.4), Chrome Gemini Nano on-device, and App Check." />
   <link rel="manifest" href="./manifest.json" />
-  <title>ScamShield v3.0 — Privacy-First Firebase Hybrid AI Fraud Defense</title>
-  <script type="module" crossorigin src="./assets/index-CqzfCRMi.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-w6NfpQWm.css">
+  <title>ScamShield AI — Enterprise Hybrid Threat Intelligence Platform</title>
+  <script type="module" crossorigin src="./assets/index-JfwEy-Lu.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-BgiKHqHd.css">
 </head>
 <body>
-  <!-- Fixed Opaque Header -->
+  <!-- Fixed Cyberpunk Header -->
   <header class="topbar" role="banner">
     <div class="topbar-inner">
       <div class="brand">
         <div class="brand-mark" aria-hidden="true">🛡️</div>
         <div class="brand-copy">
           <div class="brand-title-row">
-            <span class="brand-name">ScamShield</span>
+            <span class="brand-name">ScamShield AI</span>
             <span class="version-pill">v3.0 Hybrid AI</span>
+            <span class="hackathon-pill">#BuildHybridAI 2026</span>
           </div>
-          <p class="brand-sub">Firebase AI Logic (firebase/ai v13.4) • On-Device PII Redaction • Multimodal Forensics</p>
+          <p class="brand-sub">Firebase AI Logic (firebase/ai v13.4) • Chrome Gemini Nano • Zero-Knowledge On-Device PII Defense</p>
         </div>
       </div>
 
@@ -51,8 +52,14 @@
           </span>
           <h1 id="heroHeading">Private on-device scam triage. Verified Firebase cloud forensics when needed.</h1>
           <p class="hero-desc">
-            ScamShield scrubs OTPs, PINs, Bangla/English phone numbers, NIDs, cards, and account numbers <strong>100% locally</strong> before invoking <code>firebase/ai</code> Hybrid Inference (<code>InferenceMode.PREFER_ON_DEVICE</code>) with <code>ReCaptchaEnterpriseProvider</code> App Check.
+            ScamShield scrubs US/international phone numbers, SSNs, payment cards, bank routing numbers, and 2FA passcodes <strong>100% locally on-device</strong> before invoking <code>firebase/ai</code> Hybrid Inference (<code>InferenceMode.PREFER_ON_DEVICE</code>) with <code>ReCaptchaEnterpriseProvider</code> App Check.
           </p>
+          <div class="feature-pills-row">
+            <span class="feature-badge">⚡ Chrome Gemini Nano (Local Hardware)</span>
+            <span class="feature-badge">☁️ Firebase AI Logic (Vertex AI Cloud)</span>
+            <span class="feature-badge">🔒 Zero Raw PII Uploaded</span>
+            <span class="feature-badge">🛡️ ReCaptcha Enterprise App Check</span>
+          </div>
         </div>
 
         <div class="telemetry-grid" aria-label="Live Hybrid Telemetry">
@@ -101,7 +108,7 @@
     <section class="workspace-grid">
       <div class="panel">
         <div class="panel-header">
-          <h2>1. Suspicious Message &amp; Optional Payment Screenshot</h2>
+          <h2>1. Suspicious Threat Input &amp; Payment Forensics</h2>
           <div class="mode-selector" role="radiogroup" aria-label="Firebase AI Logic Inference Mode">
             <button type="button" class="mode-btn active" role="radio" aria-checked="true" data-mode="prefer_on_device">
               PREFER_ON_DEVICE
@@ -122,7 +129,7 @@
         <textarea
           id="messageInput"
           rows="5"
-          placeholder="Paste a suspicious SMS, WhatsApp, bKash/Nagad alert, or email in English or Bangla..."></textarea>
+          placeholder="Paste suspicious SMS, corporate email, banking alert, or payment link (e.g., Chase, PayPal, USPS, Crypto tasks)..."></textarea>
 
         <!-- Multimodal Screenshot Upload (v13 inlineData Part) -->
         <div class="multimodal-bar">
@@ -138,13 +145,13 @@
         </div>
 
         <div class="samples-bar">
-          <span class="samples-label">Quick Samples:</span>
+          <span class="samples-label">Quick Enterprise Samples:</span>
           <div id="sampleButtonsContainer" class="sample-chips"></div>
         </div>
 
         <div class="action-row">
           <button id="btnAnalyze" type="button" class="btn btn-primary">
-            🔍 Run Hybrid Scam Analysis
+            🔍 Run Hybrid Threat Analysis
           </button>
           <button id="btnClear" type="button" class="btn btn-ghost">
             Clear
@@ -159,17 +166,23 @@
           <span id="privacyDiffBadge" class="badge-safe">0 Raw Secrets Detected</span>
         </div>
         <p class="panel-hint">
-          Exact proof of what stays on your device vs. the scrubbed payload eligible for cloud fallback.
+          Mathematical proof: sensitive customer PII is scrubbed on-device prior to local Gemini Nano or cloud Vertex AI execution.
         </p>
 
         <div class="diff-grid">
-          <div class="diff-box">
-            <div class="diff-title">Raw Local Text (Stays On-Device)</div>
-            <pre id="privacyRawText" class="diff-pre">Paste or pick a sample to inspect live PII redaction…</pre>
+          <div class="diff-box diff-box-threat">
+            <div class="diff-title">
+              <span>Raw Inbound Threat (Stays On-Device)</span>
+              <span style="color:var(--warn);font-size:0.7rem;">🔒 LOCAL ONLY</span>
+            </div>
+            <pre id="privacyRawText" class="diff-pre">Paste or select an enterprise preset to inspect real-time PII redaction…</pre>
           </div>
           <div class="diff-box diff-box-clean">
-            <div class="diff-title">Sanitized Payload (Zero Raw PII)</div>
-            <pre id="privacySanitizedText" class="diff-pre">Waiting for input…</pre>
+            <div class="diff-title">
+              <span>Scrubbed Payload (Eligible for Cloud)</span>
+              <span style="color:var(--safe);font-size:0.7rem;">🛡️ 0 BYTES LEAKED</span>
+            </div>
+            <pre id="privacySanitizedText" class="diff-pre">Waiting for threat input…</pre>
           </div>
         </div>
 
@@ -200,7 +213,7 @@
           Hybrid AI Forensics
         </button>
         <button id="tabBtnReport" type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="panelReport">
-          🚨 Official Complaint (BTRC 1212 / FTC)
+          🚨 Official Legal Complaint (US FTC / FBI IC3 / APWG)
         </button>
       </div>
 
@@ -222,9 +235,9 @@
           <label class="report-select-label">
             Complaint Agency Template:
             <select id="complaintAgencySelect">
-              <option value="btrc_1212">BTRC 1212 &amp; bKash/Nagad Fraud Desk (Bangladesh)</option>
-              <option value="bd_cyber">Bangladesh Police Cyber Support (PCSW)</option>
-              <option value="ftc_ic3">US FTC / FBI IC3 Cybercrime Report</option>
+              <option value="ftc_ic3">US Federal Trade Commission (ReportFraud.ftc.gov) &amp; FBI IC3</option>
+              <option value="cisa_apwg">CISA &amp; Anti-Phishing Working Group (APWG Report)</option>
+              <option value="sec_finra">US SEC &amp; FINRA Cyber Fraud Response Unit</option>
             </select>
           </label>
           <span id="reportShaBadge" class="status-pill status-ok">SHA-256: Pending…</span>
@@ -232,7 +245,7 @@
         <pre id="incidentReportPre" class="report-pre"></pre>
         <div class="action-row">
           <button id="btnCopyReport" type="button" class="btn btn-secondary">
-            📋 Copy Complaint Draft
+            📋 Copy Official Complaint Draft
           </button>
           <button id="btnDownloadReport" type="button" class="btn btn-accent">
             ⬇ Download Signed Evidence (.txt)
@@ -245,8 +258,8 @@
     <section class="panel" aria-labelledby="benchmarkHeading">
       <div class="panel-header">
         <div>
-          <h2 id="benchmarkHeading">3. Live 20-Case Adversarial Security &amp; False-Positive Benchmark</h2>
-          <p class="panel-hint">Executes real bilingual smishing, legitimate OTP, subdomain spoof, and PII boundary assertions directly in your browser.</p>
+          <h2 id="benchmarkHeading">3. Live 20-Case Adversarial Threat &amp; Zero-Knowledge Benchmark</h2>
+          <p class="panel-hint">Executes real enterprise smishing, legitimate OTP delivery, subdomain spoofing, and PII boundary assertions directly in your browser.</p>
         </div>
         <button id="btnRunBenchmark" type="button" class="btn btn-accent">
           ▶ Run 20-Case Benchmark Live
@@ -288,11 +301,11 @@
         </div>
         <div class="forensic-card">
           <h4>Potential Impact (25%)</h4>
-          <p>Protects English &amp; Bangla mobile-finance users (bKash/Nagad/Banks) from OTP/PIN theft with zero false positives on legitimate bank SMS and 1-click BTRC 1212 / Cyber Police / FTC-IC3 complaint drafts.</p>
+          <p>Protects millions of enterprise consumers and financial customers (Chase, PayPal, BoA, Apple, Google, USPS) from credential harvesting, wire fraud, and pig butchering with zero false positives on legitimate 2FA notifications and 1-click legal incident reporting.</p>
         </div>
         <div class="forensic-card">
           <h4>Quality of the Idea (25%)</h4>
-          <p>Proves why Hybrid AI is essential for cybersecurity: raw secrets never leave the device (on-device redaction + Gemini Nano), while complex multimodal receipt forgeries escalate safely via Firebase Cloud.</p>
+          <p>Proves why Hybrid AI is essential for cybersecurity: raw customer secrets never leave the device (on-device redaction + Gemini Nano), while complex multimodal receipt forgeries escalate safely via Firebase Cloud.</p>
         </div>
       </div>
     </section>
@@ -329,8 +342,7 @@
   </div>
 
   <footer class="footer" role="contentinfo">
-    <p>ScamShield v3.0 • Built for #BuildHybridAI 2026 • Apache-2.0 Open Source • Zero Raw PII Cloud Transit</p>
+    <p>ScamShield AI v3.0 • Built for #BuildHybridAI 2026 • Apache-2.0 Open Source • Zero Raw PII Cloud Transit</p>
   </footer>
-
 </body>
 </html>

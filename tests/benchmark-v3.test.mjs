@@ -13,13 +13,14 @@ test('1. Live 20-Case Adversarial Security & PII Benchmark passes 20/20 (100% Ac
   assert.equal(bench.accuracyPct, 100);
 });
 
-test('2. Official Complaint Generator supports BTRC 1212, BD Police Cyber Support, and US FTC/IC3', async () => {
+test('2. Official Complaint Generator supports US FTC/IC3, CISA/APWG, and SEC/FINRA', async () => {
   const engine = createScamShieldHybridEngine();
   const res = await engine.analyze({ text: SAMPLES[0].text });
   for (const [key, header] of Object.entries(AGENCY_HEADERS)) {
     const report = buildIncidentReportText(res, key);
     assert.ok(report.includes(header), `Missing header for ${key}`);
-    assert.ok(!report.includes('01712345678'), `Raw phone leaked in ${key} report`);
+    assert.ok(!report.includes('9876543210123'), `Raw account leaked in ${key} report`);
+    assert.ok(!report.includes('555-0199'), `Raw phone leaked in ${key} report`);
   }
 });
 

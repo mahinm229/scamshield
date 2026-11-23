@@ -1,83 +1,88 @@
 /**
- * ScamShield v2.0 — Curated Bilingual Samples & 4 Interactive Judge Verification Tours
+ * ScamShield AI — Global Cyber Threat Presets & 4 Interactive Judge Verification Tours
+ *
+ * 100% International Standard:
+ *  - High-tier enterprise phishing vectors (Chase, PayPal, USPS, Crypto Pig Butchering)
+ *  - Real-world credential theft and 2FA harvesting patterns
+ *  - Strict Zero-False-Positive verification for legitimate Google & Apple 2FA notices
  */
 
 export const SAMPLES = [
   {
-    id: 'bkash_smishing_bn',
-    title: 'bKash Account Freeze + OTP (Bangla)',
-    badge: 'Critical Smishing',
+    id: 'chase_wire_fraud',
+    title: 'Chase Alert: Unauthorized $1,850 Transfer',
+    badge: 'High-Risk Smishing',
     recommendedMode: 'prefer_on_device',
-    text: 'জরুরি সতর্কতা! প্রিয় Rahim, আপনার বিকাশ একাউন্ট ০১৭১২৩৪৫৬৭৮ আগামী ৩০ মিনিটে বন্ধ হয়ে যাবে। এখনই আপনার পিন 4829 এবং ওটিপি ৫৫৪৪৩৩ পাঠান অথবা login.bkash-verify-bd.xyz লিংকে গিয়ে কেওয়াইসি আপডেট করুন।',
+    text: 'Chase Alert: Did you authorize a wire transfer of $1,850.00 to account 9876543210123? If NOT you, call +1 (800) 555-0199 or verify your identity at chase-security-fraud-alert.xyz/verify immediately. Provide your 6-digit OTP code to cancel transaction.',
   },
   {
-    id: 'legitimate_bkash_otp',
-    title: 'Legitimate bKash OTP SMS (Safe Check)',
-    badge: 'False-Positive Guard',
+    id: 'paypal_account_lock',
+    title: 'PayPal Account Suspension + SSN/Card Harvest',
+    badge: 'Credential Harvest',
     recommendedMode: 'prefer_on_device',
-    text: 'Your bKash verification OTP is 482913. Do not share it with anyone. bKash never asks for your OTP or PIN.',
+    text: 'PayPal Security Notice: Dear David Miller, your PayPal account has been restricted due to suspicious billing activity on card 4111-2233-4455-6677. Verify your SSN 123-45-6789 and 2FA code 847291 at paypal-resolution-center.top/login within 2 hours or access will be permanently terminated.',
   },
   {
     id: 'usps_parcel_phish',
-    title: 'USPS Customs Redelivery Phishing',
+    title: 'USPS Priority Package Customs Redelivery',
     badge: 'Subdomain Spoof',
     recommendedMode: 'prefer_on_device',
-    text: 'USPS Final Notice: Dear John Carter, your parcel is held at customs due to an incomplete address. Pay the $2.95 redelivery fee immediately at track.usps-redelivery-fee.top/confirm or it returns today.',
+    text: 'USPS Final Notice: Dear Emily Watson, package #US928374829 is held at customs sorting due to an unpaid clearance fee of $2.95. Confirm delivery address and submit fee immediately at track.usps-redelivery-notice.top/confirm or package will be returned to sender today.',
   },
   {
-    id: 'telegram_task_scam',
-    title: 'Telegram Daily Salary Task Scam',
-    badge: 'Advance-Fee Trap',
+    id: 'telegram_pig_butchering',
+    title: 'VIP Crypto Arbitrage & Task Investment Lure',
+    badge: 'Pig Butchering Trap',
     recommendedMode: 'prefer_in_cloud',
-    text: 'Congratulations! You are selected for a remote part-time job to earn $350 daily liking YouTube videos. Contact our HR manager on Telegram t.me/hr_fastpay_tasks and pay a $25 registration fee via USDT to unlock tasks.',
+    text: 'Congratulations! Your profile was selected for our remote AI evaluation team. Earn $450 daily with guaranteed 15% daily crypto arbitrage profit. Contact our VIP manager on Telegram t.me/alpha_crypto_tasks and deposit 50 USDT to unlock daily payout tasks.',
   },
   {
-    id: 'remote_anydesk_bank',
-    title: 'Fake Bank Support + AnyDesk Takeover',
-    badge: 'Device Takeover',
-    recommendedMode: 'prefer_in_cloud',
-    text: 'Urgent Bank Alert: Account 1234567890123 flagged for fraud. Install AnyDesk immediately and tell our agent your 6-digit security code 918273 or your card 4532-1198-4421-9088 will be frozen.',
+    id: 'legitimate_google_2fa',
+    title: 'Legitimate Google 2FA Delivery (Safe Check)',
+    badge: 'Zero False-Positive Guard',
+    recommendedMode: 'prefer_on_device',
+    text: 'Google: Your verification code is 482913. This code expires in 5 minutes. Do NOT share this code with anyone. Google will never ask for this code.',
   },
   {
-    id: 'benign_family_msg',
-    title: 'Normal Personal Message (Safe)',
+    id: 'benign_calendar_sync',
+    title: 'Corporate Meeting Confirmation (Safe)',
     badge: 'Verified Safe',
     recommendedMode: 'only_on_device',
-    text: 'Hi mom, I just finished my class and I will be home by 7 PM. Let me know if you need groceries on the way back.',
+    text: 'Hi Alex, our quarterly product roadmap sync is confirmed for tomorrow at 2:00 PM EST via Google Meet. The presentation deck has been shared with your team.',
   },
 ];
 
 export const JUDGE_TOURS = [
   {
     id: 'tour_hybrid_smishing',
-    label: '▶ Judge Tour 1: Bangla bKash Smishing + PII Privacy Diff',
-    sampleId: 'bkash_smishing_bn',
+    label: '▶ Judge Tour 1: Chase Wire Phishing + Zero-Knowledge PII Diff',
+    sampleId: 'chase_wire_fraud',
     mode: 'prefer_on_device',
     explanation:
-      'Demonstrates bilingual Bangla/English PII redaction (Bangla digits ০১৭..., PIN, OTP), subdomain brand spoofing detection (login.bkash-verify-bd.xyz), and PREFER_ON_DEVICE hybrid routing.',
+      'Demonstrates real-time on-device PII scrubbing (US phone, 13-digit account, OTP), subdomain brand spoofing detection (chase-security-fraud-alert.xyz), and PREFER_ON_DEVICE hybrid routing.',
   },
   {
     id: 'tour_safe_otp',
-    label: '🛡️ Judge Tour 2: Legitimate Bank OTP (Zero False Positive)',
-    sampleId: 'legitimate_bkash_otp',
+    label: '🛡️ Judge Tour 2: Legitimate Google 2FA (Zero False Positive)',
+    sampleId: 'legitimate_google_2fa',
     mode: 'prefer_on_device',
     explanation:
-      'Proves ScamShield does NOT false-positive on legitimate bank/bKash OTP advisories ("Do not share... never asks for your OTP").',
+      'Proves ScamShield accurately validates protective security advisories ("Do not share... Google will never ask") as verified SAFE (<= 8/100).',
   },
   {
     id: 'tour_pii_boundary',
-    label: '🔒 Judge Tour 3: 13-Digit Account + Card + AnyDesk Privacy Diff',
-    sampleId: 'remote_anydesk_bank',
+    label: '🔒 Judge Tour 3: PayPal SSN + Credit Card + Routing # Privacy Diff',
+    sampleId: 'paypal_account_lock',
     mode: 'prefer_in_cloud',
     explanation:
-      'Inspect the Side-by-Side Privacy Diff: 13-digit Account #, 16-digit Card #, and 6-digit security code are scrubbed cleanly on-device before any cloud call.',
+      'Inspect the Side-by-Side Privacy Diff: Social Security Number (123-45-6789), 16-digit Card Number, and 2FA passcode are scrubbed cleanly on-device before cloud eligibility.',
   },
   {
     id: 'tour_offline_only',
-    label: '⚡ Judge Tour 4: Strict ONLY_ON_DEVICE Zero-Byte Proof',
-    sampleId: 'benign_family_msg',
+    label: '⚡ Judge Tour 4: Strict ONLY_ON_DEVICE Zero-Byte Offline Proof',
+    sampleId: 'benign_calendar_sync',
     mode: 'only_on_device',
     explanation:
-      'Locks execution to ONLY_ON_DEVICE mode so judges can toggle Chrome DevTools Offline and verify 0 bytes ever leave the device.',
+      'Locks execution to ONLY_ON_DEVICE mode so judges can toggle Chrome DevTools to Offline mode and verify zero network transmission (0 B).',
   },
 ];
