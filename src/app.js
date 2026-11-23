@@ -253,11 +253,22 @@ export function initScamShieldApp(doc = document, win = window, engineOverride =
     }
     if (els.redactionTagsContainer) {
       clearChildren(els.redactionTagsContainer);
-      for (const item of diff.redactions) {
+      const items = Array.isArray(diff.redactions) ? diff.redactions : [];
+      for (const item of items) {
         const tag = doc.createElement('span');
         tag.className = 'redaction-tag';
-        tag.textContent = `${item.type} → ${item.token} (${item.preview})`;
+        tag.textContent = `${item.type} → ${item.token} (${item.preview || ''})`;
         els.redactionTagsContainer.appendChild(tag);
+      }
+      if (items.length === 0 && diff.counts) {
+        for (const [key, cnt] of Object.entries(diff.counts)) {
+          if (cnt > 0) {
+            const tag = doc.createElement('span');
+            tag.className = 'redaction-tag';
+            tag.textContent = `${key.toUpperCase()} (${cnt} scrubbed)`;
+            els.redactionTagsContainer.appendChild(tag);
+          }
+        }
       }
     }
   }

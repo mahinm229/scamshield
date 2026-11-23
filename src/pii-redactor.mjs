@@ -18,6 +18,7 @@ export function redactPII(rawText) {
       sanitized: '',
       sanitizedText: '',
       counts: { ssn: 0, card: 0, phone: 0, account: 0, code: 0, email: 0, user: 0 },
+      redactions: [],
       redactionCount: 0,
       totalRedacted: 0,
       rawBytes: 0,
@@ -30,12 +31,16 @@ export function redactPII(rawText) {
 
   let text = normalizeBanglaDigits(rawText);
   const counts = { ssn: 0, card: 0, phone: 0, account: 0, code: 0, email: 0, user: 0 };
+  const redactions = [];
 
   // 1. Social Security Numbers (SSN: XXX-XX-XXXX)
   const ssnRegex = /\b\d{3}-\d{2}-\d{4}\b/g;
   const ssnMatches = text.match(ssnRegex);
   if (ssnMatches) {
     counts.ssn = ssnMatches.length;
+    for (const m of ssnMatches) {
+      redactions.push({ type: 'SSN', token: '[REDACTED_SSN]', preview: m });
+    }
     text = text.replace(ssnRegex, '[REDACTED_SSN]');
   }
 
@@ -44,6 +49,10 @@ export function redactPII(rawText) {
   const cardMatches = text.match(cardRegex);
   if (cardMatches) {
     counts.card = cardMatches.length;
+    for (const m of cardMatches) {
+      const masked = m.slice(0, 4) + '-****-****-' + m.slice(-4);
+      redactions.push({ type: 'CARD', token: '[REDACTED_CARD]', preview: masked });
+    }
     text = text.replace(cardRegex, '[REDACTED_CARD]');
   }
 
@@ -52,6 +61,10 @@ export function redactPII(rawText) {
   const accountMatches = text.match(accountRegex);
   if (accountMatches) {
     counts.account = accountMatches.length;
+    for (const m of accountMatches) {
+      const masked = m.slice(0, 3) + '*****' + m.slice(-3);
+      redactions.push({ type: 'ACCOUNT', token: '[REDACTED_ACCOUNT]', preview: masked });
+    }
     text = text.replace(accountRegex, '[REDACTED_ACCOUNT]');
   }
 
@@ -60,6 +73,9 @@ export function redactPII(rawText) {
   const phoneMatches = text.match(phoneRegex);
   if (phoneMatches) {
     counts.phone = phoneMatches.length;
+    for (const m of phoneMatches) {
+      redactions.push({ type: 'PHONE', token: '[REDACTED_PHONE]', preview: m });
+    }
     text = text.replace(phoneRegex, '[REDACTED_PHONE]');
   }
 
@@ -67,21 +83,18 @@ export function redactPII(rawText) {
   const otpContextRegex = /(?:otp|pin|passcode|code|verification\s*code|security\s*code|2fa|পিন|ওটিপি)\s*(?:is|:|=|-)?\s*(\d{4,8})\b/gi;
   text = text.replace(otpContextRegex, (match, code) => {
     counts.code += 1;
+    redactions.push({ type: 'CODE', token: '[REDACTED_CODE]', preview: code });
     return match.replace(code, '[REDACTED_CODE]');
   });
-
-  const otpStandaloneRegex = /\b(?:\d{4,8})\b(?=.*(?:otp|pin|passcode|verification|2fa))/gi;
-  const otpStandaloneMatches = text.match(otpStandaloneRegex);
-  if (otpStandaloneMatches) {
-    counts.code += otpStandaloneMatches.length;
-    text = text.replace(otpStandaloneRegex, '[REDACTED_CODE]');
-  }
 
   // 6. Email Addresses
   const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g;
   const emailMatches = text.match(emailRegex);
   if (emailMatches) {
     counts.email = emailMatches.length;
+    for (const m of emailMatches) {
+      redactions.push({ type: 'EMAIL', token: '[REDACTED_EMAIL]', preview: m });
+    }
     text = text.replace(emailRegex, '[REDACTED_EMAIL]');
   }
 
@@ -89,6 +102,7 @@ export function redactPII(rawText) {
   const greetingRegex = /\b(?:Dear|Hello|Hi)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\b/g;
   text = text.replace(greetingRegex, (match, name) => {
     counts.user += 1;
+    redactions.push({ type: 'USER', token: '[REDACTED_USER]', preview: name });
     return match.replace(name, '[REDACTED_USER]');
   });
 
@@ -102,6 +116,7 @@ export function redactPII(rawText) {
     sanitized: text,
     sanitizedText: text,
     counts,
+    redactions,
     redactionCount,
     totalRedacted: redactionCount,
     rawBytes,
