@@ -1,5 +1,7 @@
 # ScamShield v2.0 — Privacy-First Hybrid AI Fraud Defense
 
+![ScamShield v2.0 — Privacy-First Hybrid AI Fraud Defense](./public/banner.webp)
+
 Built for **#BuildHybridAI 2026** ([Devpost](https://firebasehybridaihackathon.devpost.com/)) using **Firebase AI Logic Hybrid Inference (`firebase@^13.4.0`, `firebase/ai`)**, **Chrome Built-in AI (Gemini Nano)**, **Gemini Cloud Fallback (`gemini-3.5-flash-lite` / `gemini-3.8-flash`)**, and **Firebase App Check (`ReCaptchaEnterpriseProvider`)**.
 
 ## Why Hybrid AI Matters for Financial Scam Defense
