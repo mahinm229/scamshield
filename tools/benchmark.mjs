@@ -16,7 +16,7 @@ const totalMs = performance.now() - start;
 const avgMs = totalMs / ITERATIONS;
 const opsPerSec = Math.round((ITERATIONS / totalMs) * 1000);
 
-console.log(`ScamShield v2.0 Local Triage + Bilingual PII Redaction Benchmark`);
+console.log(`ScamShield AI v3.0 Local Triage + Zero-Knowledge PII Redaction Benchmark`);
 console.log(`Iterations : ${ITERATIONS}`);
 console.log(`Total time : ${totalMs.toFixed(2)} ms`);
 console.log(`Avg / scan : ${avgMs.toFixed(4)} ms`);

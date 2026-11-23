@@ -1,7 +1,7 @@
 {
   "name": "scamshield-hybrid-ai",
   "version": "3.0.0",
-  "description": "ScamShield v2.0 — Privacy-First Bilingual Financial Smishing & Fake-Receipt Defense powered by Firebase AI Logic Hybrid Inference (Gemini Nano + Gemini Cloud Fallback) and App Check.",
+  "description": "ScamShield AI v3.0 — Privacy-First Global Enterprise Hybrid Threat Intelligence Platform powered by Firebase AI Logic Hybrid Inference (Chrome Gemini Nano + Vertex AI Cloud) and Firebase App Check.",
   "type": "module",
   "scripts": {
     "dev": "vite",
