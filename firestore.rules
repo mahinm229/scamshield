@@ -1,0 +1,28 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Strictly auth-gated, schema-validated per-user anonymized scan telemetry (never raw PII)
+    match /users/{userId}/scanTelemetry/{scanId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly([
+          'verdict', 'riskScore', 'inferenceSource', 'redactionCount', 'createdAt'
+        ])
+        && request.resource.data.verdict in ['SAFE', 'SUSPICIOUS', 'HIGH_RISK_SCAM']
+        && request.resource.data.riskScore is int
+        && request.resource.data.riskScore >= 0
+        && request.resource.data.riskScore <= 100
+        && request.resource.data.inferenceSource in ['ON_DEVICE', 'IN_CLOUD', 'LOCAL_RULES_ONLY']
+        && request.resource.data.redactionCount is int
+        && request.resource.data.redactionCount >= 0;
+      allow update, delete: if false;
+    }
+
+    // Default deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
